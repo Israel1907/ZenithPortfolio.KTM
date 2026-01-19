@@ -52,7 +52,7 @@ class CryptoViewModel(
 
             repository.getCryptos()
                 .onSuccess { cryptos ->
-                    println("✅ [CryptoViewModel] Loaded ${cryptos.size} cryptos")
+                    println("[CryptoViewModel] Loaded ${cryptos.size} cryptos")
                     _state.update {
                         it.copy(
                             isLoading = false,

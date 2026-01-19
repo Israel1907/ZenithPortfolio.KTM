@@ -11,12 +11,12 @@ class CryptoRepositoryImpl(
 
     override suspend fun getCryptos(): Result<List<Crypto>> {
         return try{
-            println("📡 [Repository] Calling CoinGecko API...")
+            println("[Repository] Calling CoinGecko API...")
             val response = api.getMarkets()
-            println("📡 [Repository] Got ${response.size} items from API")
+            println("[Repository] Got ${response.size} items from API")
             Result.success(response.map { it.toDomain() })
         }catch (e: Exception){
-            println("❌ [Repository] API Error: ${e.message}")
+            println("[Repository] API Error: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }
