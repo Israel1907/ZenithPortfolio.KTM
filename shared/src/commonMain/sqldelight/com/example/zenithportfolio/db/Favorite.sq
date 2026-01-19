@@ -1,0 +1,12 @@
+CREATE TABLE Favorite(
+cryptoId TEXT PRIMARY KEY NOT NULL
+);
+
+selectAll:
+SELECT * FROM Favorite;
+
+insert:
+INSERT OR IGNORE INTO Favorite(cryptoId) VALUES (?);
+
+delete:
+DELETE FROM Favorite WHERE cryptoId = ?;
