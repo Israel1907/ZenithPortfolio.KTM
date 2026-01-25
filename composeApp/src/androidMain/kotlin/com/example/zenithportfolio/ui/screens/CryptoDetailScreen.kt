@@ -12,7 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
+import com.example.zenithportfolio.ui.theme.Accent
+import com.example.zenithportfolio.ui.theme.Negative
+import com.example.zenithportfolio.ui.theme.Positive
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,7 +92,7 @@ fun CryptoDetailContent(
 ){
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(Color(0xFF0D0D0D))
+        .background(MaterialTheme.colorScheme.background)
         .statusBarsPadding()
         .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -101,13 +105,13 @@ fun CryptoDetailContent(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF1A1A1A))
+                    .background(MaterialTheme.colorScheme.surface)
                     .clickable { onBack() },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "‹",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.offset(x = (-1).dp, y = (-2).dp)
@@ -130,14 +134,14 @@ fun CryptoDetailContent(
 
         Text(
             text = crypto.name,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
 
         Text(
             text = crypto.symbol.uppercase(),
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 18.sp
         )
 
@@ -146,23 +150,23 @@ fun CryptoDetailContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         {
             Column(
                 modifier = Modifier.padding(16.dp)
             )
             {
-                Text("Precio actual", color = Color.Gray, fontSize = 14.sp)
+                Text("Precio actual", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                 Text(
                     text = "$${formatPrice(crypto.price)}",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "${if (crypto.changePercent24h >= 0) "+" else ""}${"%.2f".format(crypto.changePercent24h)}% (24h)",
-                    color = if (crypto.changePercent24h >= 0) Color(0xFF00D4AA) else Color(0xFFFF4444),
+                    color = if (crypto.changePercent24h >= 0) Positive else Negative,
                     fontSize = 16.sp
                 )
 
@@ -183,7 +187,7 @@ fun CryptoDetailContent(
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = if (selectedDays == 1) "Últimas 24 horas" else "Últimos $selectedDays días",
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             modifier = Modifier.fillMaxWidth()
         )
@@ -233,14 +237,14 @@ fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(title, color = Color.Gray, fontSize = 14.sp)
-            Text(value, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+            Text(value, color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -276,19 +280,19 @@ fun PriceChart(prices: List<Double>, days: Int, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         CartesianChartHost(
             chart = rememberCartesianChart(
                 rememberLineCartesianLayer(
                     lineProvider = LineCartesianLayer.LineProvider.series(
                         LineCartesianLayer.rememberLine(
-                            fill = LineCartesianLayer.LineFill.single(fill(Color(0xFF00D4AA)))
+                            fill = LineCartesianLayer.LineFill.single(fill(Accent))
                         )
                     )
                 ),
                 startAxis = VerticalAxis.rememberStart(
-                    label = rememberTextComponent(color = Color.Gray),
+                    label = rememberTextComponent(color = MaterialTheme.colorScheme.onSurfaceVariant),
                     valueFormatter = { _, value, _ ->
                         if (value >= 1000) "$${(value / 1000).toInt()}k"
                         else if (value >= 1) "$${value.toInt()}"
@@ -313,13 +317,13 @@ fun DayButton(text: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(if (selected) Color(0xFF00D4AA) else Color(0xFF1A1A1A))
+            .background(if (selected) Accent else MaterialTheme.colorScheme.surface)
             .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
             text = text,
-            color = if (selected) Color.Black else Color.White,
+            color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )

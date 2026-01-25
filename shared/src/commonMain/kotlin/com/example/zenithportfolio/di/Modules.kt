@@ -6,6 +6,7 @@ import com.example.zenithportfolio.data.repository.CryptoRepositoryImpl
 import com.example.zenithportfolio.domain.repository.CryptoRepository
 import com.example.zenithportfolio.presentation.crypto.CryptoViewModel
 import com.example.zenithportfolio.data.db.DatabaseDriverFactory
+import com.example.zenithportfolio.data.repository.CryptoCache
 import com.example.zenithportfolio.data.repository.FavoriteRepository
 import com.example.zenithportfolio.db.AppDatabase
 
@@ -22,19 +23,20 @@ val databaseModule = module {
     single { AppDatabase(get()) }
     single { get<AppDatabase>().favoriteQueries }
     single { FavoriteRepository(get()) }
-}
-
-val repositoryModule = module {
-    single<CryptoRepository>{ CryptoRepositoryImpl(get()) }
+    single { CryptoCache(get<AppDatabase>().cachedCryptoQueries) }
 }
 
 val viewModelModule = module {
     factory { CryptoViewModel(get(), get()) }
 }
 
+val repositoryModule = module {
+    single<CryptoRepository> { CryptoRepositoryImpl(get(), get()) }
+}
 val appModules = listOf(
     networkModule,
     databaseModule,
     repositoryModule,
     viewModelModule
 )
+

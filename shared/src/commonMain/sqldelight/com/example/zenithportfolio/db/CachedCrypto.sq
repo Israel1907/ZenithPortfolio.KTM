@@ -1,0 +1,20 @@
+CREATE TABLE CachedCrypto(
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    price REAL NOT NULL,
+    changePercent24h REAL NOT NULL,
+    imageUrl TEXT NOT NULL,
+    marketCap INTEGER NOT NULL,
+    rank INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM CachedCrypto ORDER BY rank ASC;
+
+insertOrReplace:
+INSERT OR REPLACE INTO CachedCrypto(id, name, symbol, price, changePercent24h, imageUrl, marketCap, rank)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM CachedCrypto;

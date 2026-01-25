@@ -3,6 +3,7 @@ package com.example.zenithportfolio.di
 import com.example.zenithportfolio.data.api.CoinGeckoApi
 import com.example.zenithportfolio.data.api.createHttpClient
 import com.example.zenithportfolio.data.db.DatabaseDriverFactory
+import com.example.zenithportfolio.data.repository.CryptoCache
 import com.example.zenithportfolio.data.repository.CryptoRepositoryImpl
 import com.example.zenithportfolio.data.repository.FavoriteRepository
 import com.example.zenithportfolio.db.AppDatabase
@@ -15,10 +16,10 @@ object IosHelper {
     fun createViewModel(): CryptoViewModel {
         val httpClient = createHttpClient()
         val api = CoinGeckoApi(httpClient)
-        val repository = CryptoRepositoryImpl(api)
-
         val driverFactory = DatabaseDriverFactory()
         val database = AppDatabase(driverFactory.createDriver())
+        val cache = CryptoCache(database.cachedCryptoQueries)
+        val repository = CryptoRepositoryImpl(api, cache)
         val favoriteRepository = FavoriteRepository(database.favoriteQueries)
 
         return CryptoViewModel(repository, favoriteRepository)

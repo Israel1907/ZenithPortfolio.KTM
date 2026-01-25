@@ -6,19 +6,26 @@ import com.example.zenithportfolio.domain.model.Crypto
 import com.example.zenithportfolio.domain.repository.CryptoRepository
 
 class CryptoRepositoryImpl(
-    private val api: CoinGeckoApi
+    private val api: CoinGeckoApi,
+    private val cache: CryptoCache
 ): CryptoRepository{
 
-    override suspend fun getCryptos(): Result<List<Crypto>> {
+    override suspend fun getCryptos(): Result<CryptoResult> {
         return try{
             println("[Repository] Calling CoinGecko API...")
             val response = api.getMarkets()
-            println("[Repository] Got ${response.size} items from API")
-            Result.success(response.map { it.toDomain() })
+            val cryptos = response.map { it.toDomain() }
+            cache.saveCryptos(cryptos)
+            Result.success(CryptoResult(cryptos, fromCache = false))
         }catch (e: Exception){
             println("[Repository] API Error: ${e.message}")
-            e.printStackTrace()
-            Result.failure(e)
+            val cached = cache.getCachedCryptos()
+            if (cached.isNotEmpty()) {
+                println("[Repository] Returning ${cached.size} items from cache")
+                Result.success(CryptoResult(cached, fromCache = true))
+            } else {
+                Result.failure(e)
+            }
         }
     }
 

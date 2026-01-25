@@ -51,15 +51,21 @@ class CryptoViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
 
             repository.getCryptos()
-                .onSuccess { cryptos ->
-                    println("[CryptoViewModel] Loaded ${cryptos.size} cryptos")
+                .onSuccess { result ->
+                    println("[CryptoViewModel] Loaded ${result.cryptos.size} cryptos")
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            cryptos = cryptos,
-                            filteredCryptos = cryptos
+                            cryptos = result.cryptos,
+                            filteredCryptos = result.cryptos,
+                            fromCache = result.fromCache
                         )
                     }
+
+                    if (result.fromCache) {
+                        _effect.send(CryptoEffect.ShowToast("Datos del cache - CoinGecko limitado"))
+                    }
+
                 }
                 .onFailure { e ->
                     println("[CryptoViewModel] Error: ${e.message}")
@@ -75,19 +81,24 @@ class CryptoViewModel(
             _state.update { it.copy(isRefreshing = true) }
 
             repository.getCryptos()
-                .onSuccess { cryptos ->
+                .onSuccess { result ->
                     _state.update {
                         it.copy(
                             isRefreshing = false,
-                            cryptos = cryptos,
-                            filteredCryptos = filterCryptos(cryptos, it.searchQuery)
+                            cryptos = result.cryptos,
+                            filteredCryptos = filterCryptos(result.cryptos, it.searchQuery),
+                            fromCache = result.fromCache
                         )
+                    }
+                    if (result.fromCache) {
+                        _effect.send(CryptoEffect.ShowToast("Datos del cache - CoinGecko limitado"))
                     }
                 }
                 .onFailure { e ->
                     _state.update { it.copy(isRefreshing = false) }
                     _effect.send(CryptoEffect.ShowError(e.message ?: "Error al refrescar"))
                 }
+
         }
     }
 

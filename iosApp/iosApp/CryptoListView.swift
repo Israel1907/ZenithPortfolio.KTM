@@ -11,23 +11,24 @@ import Shared
 struct CryptoListView: View {
     @StateObject private var viewModel = CryptoViewModelWrapper()
     @State private var selectedCrypto: Crypto? = nil
+    @Environment(\.appColors) var colors
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "0D0D0D").ignoresSafeArea()
+                colors.background.ignoresSafeArea()
 
                 if viewModel.isLoading {
                     ProgressView()
-                        .tint(Color(hex: "00D4AA"))
+                        .tint(AppColors.accent)
                 } else if let error = viewModel.error {
                     VStack {
                         Text("Error: \(error)")
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.negative)
                         Button("Reintentar") {
                             viewModel.loadCryptos()
                         }
-                        .foregroundColor(Color(hex: "00D4AA"))
+                        .foregroundColor(AppColors.accent)
                     }
                 } else {
                     VStack(spacing: 0) {
@@ -35,13 +36,13 @@ struct CryptoListView: View {
                         HStack {
                             Text("🔍")
                             TextField("Buscar crypto...", text: $viewModel.searchQuery)
-                                .foregroundColor(.white)
+                                .foregroundColor(colors.onSurface)
                                 .onChange(of: viewModel.searchQuery) { newValue in
                                     viewModel.search(query: newValue)
                                 }
                         }
                         .padding()
-                        .background(Color(hex: "1A1A1A"))
+                        .background(colors.surface)
                         .cornerRadius(12)
                         .padding()
 
@@ -52,9 +53,10 @@ struct CryptoListView: View {
                                 isFavorite: viewModel.favorites.contains(crypto.id),
                                 onFavoriteToggle: {
                                     viewModel.toggleFavorite(cryptoId: crypto.id)
-                                }
+                                },
+                                colors: colors
                             )
-                            .listRowBackground(Color(hex: "0D0D0D"))
+                            .listRowBackground(colors.background)
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                             .onTapGesture {
@@ -71,6 +73,21 @@ struct CryptoListView: View {
             .navigationDestination(item: $selectedCrypto) { crypto in
                 CryptoDetailView(crypto: crypto)
             }
+            .overlay(alignment: .bottom) {
+                if viewModel.showCacheWarning {
+                    Text("Datos del cache - CoinGecko limitado")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.orange)
+                        .cornerRadius(8)
+                        .padding(.bottom, 50)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                viewModel.showCacheWarning = false
+                            }
+                        }
+                }
+            }
         }
     }
 }
@@ -79,6 +96,7 @@ struct CryptoRow: View {
     let crypto: Crypto
     let isFavorite: Bool
     let onFavoriteToggle: () -> Void
+    let colors: AppColors
 
     var body: some View {
         HStack {
@@ -92,10 +110,10 @@ struct CryptoRow: View {
 
             VStack(alignment: .leading) {
                 Text(crypto.name)
-                    .foregroundColor(.white)
+                    .foregroundColor(colors.onSurface)
                     .fontWeight(.bold)
                 Text(crypto.symbol.uppercased())
-                    .foregroundColor(.gray)
+                    .foregroundColor(colors.onSurfaceVariant)
                     .font(.caption)
             }
 
@@ -103,10 +121,10 @@ struct CryptoRow: View {
 
             VStack(alignment: .trailing) {
                 Text("$\(formatPrice(crypto.price))")
-                    .foregroundColor(.white)
+                    .foregroundColor(colors.onSurface)
                     .fontWeight(.bold)
                 Text("\(crypto.changePercent24h >= 0 ? "+" : "")\(String(format: "%.2f", crypto.changePercent24h))%")
-                    .foregroundColor(crypto.changePercent24h >= 0 ? Color(hex: "00D4AA") : Color(hex: "FF4444"))
+                    .foregroundColor(crypto.changePercent24h >= 0 ? AppColors.positive : AppColors.negative)
                     .font(.caption)
                 Button(action: onFavoriteToggle) {
                     Text(isFavorite ? "⭐" : "☆")
@@ -114,10 +132,10 @@ struct CryptoRow: View {
                 }
             }
 
-           
+
         }
         .padding()
-        .background(Color(hex: "1A1A1A"))
+        .background(colors.surface)
         .cornerRadius(16)
         .padding(.horizontal, 6)
     }

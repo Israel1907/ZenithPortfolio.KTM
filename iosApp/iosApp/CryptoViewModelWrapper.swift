@@ -11,7 +11,10 @@ class CryptoViewModelWrapper: ObservableObject {
     @Published var error: String? = nil
     @Published var searchQuery: String = ""
     @Published var favorites: Set<String> = []
-    
+    @Published var showCacheWarning: Bool = false
+    private var hasShownCacheWarning: Bool = false
+
+
     init() {
         self.viewModel = IosHelper.shared.createViewModel()
         startObserving()
@@ -52,7 +55,14 @@ class CryptoViewModelWrapper: ObservableObject {
         self.cryptos = state.filteredCryptos
         self.isLoading = state.isLoading
         self.error = state.error
-        
+        if state.fromCache && !hasShownCacheWarning {
+            self.showCacheWarning = true
+            hasShownCacheWarning = true
+        }
+        if !state.fromCache {
+            hasShownCacheWarning = false
+        }
+
         // Convertir Set de Kotlin a Set de Swift
         var swiftFavorites = Set<String>()
         for fav in state.favorites {

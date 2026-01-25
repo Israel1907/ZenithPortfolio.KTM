@@ -7,12 +7,13 @@ struct CryptoDetailView: View {
     @State private var selectedDays: Int = 7
     @State private var isLoading: Bool = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.appColors) var colors
 
     private let chartFetcher = ChartFetcher()
 
     var body: some View {
         ZStack {
-            Color(hex: "0D0D0D").ignoresSafeArea()
+            colors.background.ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 16) {
@@ -20,11 +21,11 @@ struct CryptoDetailView: View {
                     HStack {
                         Button(action: { dismiss() }) {
                             Circle()
-                                .fill(Color(hex: "1A1A1A"))
+                                .fill(colors.surface)
                                 .frame(width: 40, height: 40)
                                 .overlay(
                                     Text("‹")
-                                        .foregroundColor(.white)
+                                        .foregroundColor(colors.onSurface)
                                         .font(.title)
                                         .offset(x: -1, y: -2)
                                 )
@@ -42,47 +43,48 @@ struct CryptoDetailView: View {
                     .clipShape(Circle())
 
                     Text(crypto.name)
-                        .foregroundColor(.white)
+                        .foregroundColor(colors.onBackground)
                         .font(.title)
                         .fontWeight(.bold)
 
                     Text(crypto.symbol.uppercased())
-                        .foregroundColor(.gray)
+                        .foregroundColor(colors.onSurfaceVariant)
 
                     // Price card
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Precio actual")
-                            .foregroundColor(.gray)
+                            .foregroundColor(colors.onSurfaceVariant)
                             .font(.caption)
 
                         Text("$\(formatPrice(crypto.price))")
-                            .foregroundColor(.white)
+                            .foregroundColor(colors.onSurface)
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
                         Text("\(crypto.changePercent24h >= 0 ? "+" : "")\(String(format: "%.2f", crypto.changePercent24h))% (24h)")
-                            .foregroundColor(crypto.changePercent24h >= 0 ? Color(hex: "00D4AA") : Color(hex: "FF4444"))
+                            .foregroundColor(crypto.changePercent24h >= 0 ? AppColors.positive : AppColors.negative)
 
                         HStack {
-                            StatCard(title: "Rank", value: "#\(crypto.rank)")
-                            StatCard(title: "Market Cap", value: formatMarketCap(crypto.marketCap))
+                            StatCard(title: "Rank", value: "#\(crypto.rank)", colors: colors)
+                            StatCard(title: "Market Cap", value: formatMarketCap(crypto.marketCap), colors: colors)
                         }
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(hex: "1A1A1A"))
+                    .background(colors.surface)
                     .cornerRadius(16)
 
                     // Days selector
                     Text(selectedDays == 1 ? "Últimas 24 horas" : "Últimos \(selectedDays) días")
-                        .foregroundColor(.gray)
+                        .foregroundColor(colors.onSurfaceVariant)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     HStack {
                         ForEach([1, 7, 30, 90], id: \.self) { days in
                             DayButton(
                                 text: days == 1 ? "24h" : "\(days)d",
-                                selected: selectedDays == days
+                                selected: selectedDays == days,
+                                colors: colors
                             ) {
                                 selectedDays = days
                                 loadChart()
@@ -95,12 +97,12 @@ struct CryptoDetailView: View {
                     // Chart
                     if isLoading {
                         ProgressView()
-                            .tint(Color(hex: "00D4AA"))
+                            .tint(AppColors.accent)
                             .frame(height: 200)
                     } else if !priceHistory.isEmpty {
-                        ChartView(prices: priceHistory)
+                        ChartView(prices: priceHistory, colors: colors)
                             .frame(height: 200)
-                            .background(Color(hex: "1A1A1A"))
+                            .background(colors.surface)
                             .cornerRadius(16)
                     }
                 }
@@ -150,19 +152,20 @@ struct CryptoDetailView: View {
 struct StatCard: View {
     let title: String
     let value: String
+    let colors: AppColors
 
     var body: some View {
         VStack {
             Text(title)
-                .foregroundColor(.gray)
+                .foregroundColor(colors.onSurfaceVariant)
                 .font(.caption)
             Text(value)
-                .foregroundColor(.white)
+                .foregroundColor(colors.onSurface)
                 .fontWeight(.bold)
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color(hex: "1A1A1A"))
+        .background(colors.surface)
         .cornerRadius(12)
     }
 }
@@ -170,16 +173,17 @@ struct StatCard: View {
 struct DayButton: View {
     let text: String
     let selected: Bool
+    let colors: AppColors
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Text(text)
-                .foregroundColor(selected ? .black : .white)
+                .foregroundColor(selected ? .black : colors.onSurface)
                 .fontWeight(.medium)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(selected ? Color(hex: "00D4AA") : Color(hex: "1A1A1A"))
+                .background(selected ? AppColors.accent : colors.surface)
                 .cornerRadius(8)
         }
     }
@@ -187,6 +191,7 @@ struct DayButton: View {
 
 struct ChartView: View {
     let prices: [Double]
+    let colors: AppColors
 
     var minPrice: Double { prices.min() ?? 0 }
     var maxPrice: Double { prices.max() ?? 1 }
@@ -208,7 +213,7 @@ struct ChartView: View {
                 }
             }
             .font(.system(size: 10))
-            .foregroundColor(.gray)
+            .foregroundColor(colors.onSurfaceVariant)
             .frame(width: 50, alignment: .trailing)
 
             // Chart
@@ -227,7 +232,7 @@ struct ChartView: View {
                         }
                     }
                 }
-                .stroke(Color(hex: "00D4AA"), lineWidth: 2)
+                .stroke(AppColors.accent, lineWidth: 2)
             }
         }
         .padding()

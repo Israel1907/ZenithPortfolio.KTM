@@ -11,7 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
+import com.example.zenithportfolio.ui.theme.Accent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,8 +45,7 @@ fun SplashScreen(onSplashFinished: () -> Unit){
 
     Box(modifier = Modifier
         .fillMaxSize()
-        .background(
-            Color(0xFF0D0D0D)),
+        .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -63,14 +63,14 @@ fun SplashScreen(onSplashFinished: () -> Unit){
 
             Text(
                 text = "Zenith",
-                color = Color(0xFF00D4AA),
+                color = Accent,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
                 text = "Portfolio",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Light
             )
@@ -79,7 +79,7 @@ fun SplashScreen(onSplashFinished: () -> Unit){
 
             Text(
                 text = "Tu portafolio crypto",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
         }

@@ -1,5 +1,6 @@
 package com.example.zenithportfolio.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
+import com.example.zenithportfolio.ui.theme.Accent
+import com.example.zenithportfolio.ui.theme.Negative
+import com.example.zenithportfolio.ui.theme.Positive
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,9 +38,11 @@ import org.koin.compose.koinInject
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.example.zenithportfolio.presentation.crypto.CryptoEffect
 
 class CryptoListScreen: Screen{
 
@@ -45,9 +51,20 @@ class CryptoListScreen: Screen{
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: CryptoViewModel = koinInject()
         val state by viewModel.state.collectAsState()
+        val context = LocalContext.current
 
         LaunchedEffect(Unit) {
-            viewModel.onIntent(CryptoIntent.LoadCryptos)
+            viewModel.effect.collect { effect ->
+                when (effect) {
+                    is CryptoEffect.ShowToast -> {
+                        Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                    }
+                    is CryptoEffect.ShowError -> {
+                        Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                    }
+                    else -> {}
+                }
+            }
         }
 
         CryptoListContent(
@@ -75,13 +92,13 @@ fun CryptoListContent(
 ){
     Box(modifier = Modifier
         .fillMaxSize()
-        .background(Color(0xFF0D0D0D))
+        .background(MaterialTheme.colorScheme.background)
     ){
         when{
             state.isLoading ->{
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFF00D4AA)
+                    color = Accent
                 )
             }
             state.error != null -> {
@@ -91,7 +108,7 @@ fun CryptoListContent(
                 ){
                     Text(
                         text = "Error: ${state.error}",
-                        color = Color.Red
+                        color = Negative
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = onRefresh){
@@ -113,16 +130,16 @@ fun CryptoListContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            placeholder = { Text("Buscar crypto...", color = Color.Gray) },
+                            placeholder = { Text("Buscar crypto...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                             leadingIcon = { Text("🔍", fontSize = 18.sp) },
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFF1A1A1A),
-                                unfocusedContainerColor = Color(0xFF1A1A1A),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                cursorColor = Color(0xFF00D4AA),
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                cursorColor = Accent,
+                                focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                                unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent
                             ),
                             shape = RoundedCornerShape(12.dp),
                             singleLine = true
@@ -162,7 +179,7 @@ fun CryptoCard(
             .clickable{onClick()},
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A1A)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -184,13 +201,13 @@ fun CryptoCard(
             Column(modifier = Modifier.weight(1f)){
                 Text(
                     text = crypto.name,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Text(
                     text = crypto.symbol,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
             }
@@ -198,13 +215,13 @@ fun CryptoCard(
             Column(horizontalAlignment = Alignment.End){
                 Text(
                     text = "$${formatPrice(crypto.price)}",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Text(
                     text = "${if (crypto.changePercent24h >= 0) "+" else ""}${"%.2f".format(crypto.changePercent24h)}%",
-                    color = if (crypto.changePercent24h >= 0) Color(0xFF00D4AA) else Color(0xFFFF4444),
+                    color = if (crypto.changePercent24h >= 0) Positive else Negative,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.width(8.dp))

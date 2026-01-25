@@ -9,5 +9,6 @@ data class CryptoState(
     val filteredCryptos: List<Crypto> = emptyList(),
     val favorites: Set<String> = emptySet(),
     val searchQuery: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val fromCache: Boolean = false
 )
